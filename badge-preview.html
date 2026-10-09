@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FixGEO Protocol Inspector</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <style>
+    body {
+      background-color: #0b0f17;
+      color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+    }
+    .admin-pill {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 16px 0;
+      color: #fff;
+    }
+    .dir-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      background: #111827;
+      color: #9ca3af;
+      border: 1px solid #1f2937;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #1f2937;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    .company-pills {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      min-height: 34px;
+    }
+    .comp-btn {
+      background: #1f2937;
+      color: #9ca3af;
+      border: 1px solid #374151;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .comp-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    .card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 32px;
+      width: 440px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1f2937;
+    }
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+    .protocol-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #9ca3af;
+      text-transform: uppercase;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+    .badge-active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+    }
+    .badge-pending {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+    }
+    h2 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      color: #ffffff;
+    }
+    .sector {
+      color: #9ca3af;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #1f2937;
+      padding: 12px 0;
+      font-size: 14px;
+    }
+    .metric-label {
+      color: #6b7280;
+    }
+    .metric-value {
+      font-weight: 600;
+      color: #f3f4f6;
+      font-family: monospace;
+    }
+    .etherscan-btn {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      padding: 12px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+    .etherscan-btn:hover {
+      opacity: 0.9;
+    }
+    .status-text {
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-pill">Internal Protocol Inspector</div>
+  <h1>Multi-Directory On-Chain Oracle</h1>
+
+  <!-- Step 1: Directory Selection -->
+  <div class="dir-tabs">
+    <button class="tab-btn active" onclick="selectDirectory('TUMAPAIA', this)">🌱 TuMapaIA (AgTech)</button>
+    <button class="tab-btn" onclick="selectDirectory('VASTFUNNEL', this)">🏗️ VastFunnel (Circular)</button>
+    <button class="tab-btn" onclick="selectDirectory('LISTADOMOS', this)">⛺ ListadoMos (Geodesic)</button>
+  </div>
+
+  <!-- Step 2: Companies inside that Directory -->
+  <div class="company-pills" id="company-pills"></div>
+
+  <!-- The Card queried from Ethereum -->
+  <div class="card">
+    <div class="header-bar">
+      <div class="logo-group">
+        <img src="fixgeo_logo2.png" alt="FixGEO" class="logo-img">
+        <span class="protocol-title">FixGEO Protocol</span>
+      </div>
+      <span style="font-size: 11px; color: #6b7280; font-family: monospace;">EVM ORACLE</span>
+    </div>
+
+    <div id="badge-container">
+      <span class="badge" style="background:#1f2937; color:#9ca3af;">⏳ Querying Ethereum...</span>
+    </div>
+
+    <h2 id="company-name">Loading...</h2>
+    <div class="sector" id="company-sector">...</div>
+
+    <div class="metric-row">
+      <span class="metric-label">Directory Network</span>
+      <span class="metric-value" id="dir-tag">--</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">AI Visibility Score</span>
+      <span class="metric-value" id="score-val">-- / 100</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">RAG Manifest (IPFS)</span>
+      <span class="metric-value" id="hash-val" style="font-size: 11px;">--</span>
+    </div>
+
+    <a href="https://sepolia.etherscan.io/address/0x3b2Cd2c620976826F1C98CDdBb20C40AED6c0B6B" target="_blank" class="etherscan-btn">
+      Verify on Ethereum Sepolia ↗
+    </a>
+
+    <div class="status-text" id="status-text">Connecting to Alchemy RPC...</div>
+  </div>
+
+  <script>
+    const RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/alch_BybEztig02lGX4HNeSrue";
+    const CONTRACT_ADDRESS = "0x3b2Cd2c620976826F1C98CDdBb20C40AED6c0B6B";
+
+    const DIRECTORIES = {
+      TUMAPAIA: [
+        { id: 101, name: "Taranis Ag", sector: "Precision Agriculture • Autonomous Scouting" },
+        { id: 102, name: "FarmDroid FD20", sector: "Solar Ag-Robotics • Seeding & Weeding" },
+        { id: 103, name: "Carbon Robotics", sector: "LaserWeeding™ • Thermal Ag-Robotics" }
+      ],
+      VASTFUNNEL: [
+        { id: 201, name: "cepezed", sector: "Circular Architecture • Demountable Construction" }
+      ],
+      LISTADOMOS: [
+        { id: 301, name: "Tierra Geodesica", sector: "Geodesic Engineering • Rosario, Argentina" }
+      ]
+    };
+
+    const ABI = [
+      "function subscriptions(uint256 companyId) view returns (uint256, string, string, uint16, uint256, string, bool)",
+      "function isRAGActive(uint256 companyId) view returns (bool active, uint16 score, string ragHash)"
+    ];
+
+    let provider = new ethers.JsonRpcProvider(RPC_URL);
+    let contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+    let currentDir = 'TUMAPAIA';
+
+    function selectDirectory(dirKey, btn) {
+      currentDir = dirKey;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Render company pills for this directory only
+      const container = document.getElementById("company-pills");
+      container.innerHTML = "";
+
+      const companies = DIRECTORIES[dirKey];
+      companies.forEach((comp, index) => {
+        const cBtn = document.createElement("button");
+        cBtn.className = "comp-btn" + (index === 0 ? " active" : "");
+        cBtn.innerText = comp.name;
+        cBtn.onclick = () => {
+          document.querySelectorAll(".comp-btn").forEach(b => b.classList.remove("active"));
+          cBtn.classList.add("active");
+          loadCompany(comp);
+        };
+        container.appendChild(cBtn);
+      });
+
+      // Load first company in selected directory
+      loadCompany(companies[0]);
+    }
+
+    async function loadCompany(comp) {
+      document.getElementById("company-name").innerText = comp.name;
+      document.getElementById("company-sector").innerText = comp.sector;
+      document.getElementById("badge-container").innerHTML = '<span class="badge" style="background:#1f2937; color:#9ca3af;">⏳ Querying Ethereum...</span>';
+      document.getElementById("status-text").innerText = "Reading live on-chain record...";
+
+      try {
+        const [active, score, ragHash] = await contract.isRAGActive(comp.id);
+        const [subId, subName, dirTag] = await contract.subscriptions(comp.id);
+
+        document.getElementById("dir-tag").innerText = dirTag;
+        document.getElementById("score-val").innerText = (Number(score) / 10).toFixed(1) + " / 100";
+        document.getElementById("hash-val").innerText = ragHash ? ragHash.slice(0, 16) + "..." : "Pending Retainer";
+
+        const badgeContainer = document.getElementById("badge-container");
+        if (active) {
+          if (dirTag === "VASTFUNNEL") {
+            badgeContainer.innerHTML = '<span class="badge badge-active">🟢 FIXGEO VERIFIED</span>';
+          } else {
+            badgeContainer.innerHTML = '<span class="badge badge-active">🛡️ FIXGEO AUDITED [ON-CHAIN VERIFIED]</span>';
+          }
+          document.getElementById("status-text").innerText = "✓ Active on-chain subscription verified";
+        } else {
+          badgeContainer.innerHTML = '<span class="badge badge-pending">🟣 [ VALIDACIÓN FORENSE: PENDIENTE ]</span>';
+          document.getElementById("status-text").innerText = "⚠ Free baseline audit completed • Retainer pending";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status-text").innerText = "Error: " + err.message;
+      }
+    }
+
+    // Initialize with TuMapaIA
+    selectDirectory('TUMAPAIA', document.querySelector('.tab-btn'));
+  </script>
+
+</body>
+</html>

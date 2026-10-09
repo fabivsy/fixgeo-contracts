@@ -1,0 +1,4 @@
+FixGeoAuditRegistryTest:test_AdminCanGrantAuditorRole() (gas: 241938)
+FixGeoAuditRegistryTest:test_FreeAuditAndMonthlyRenewal() (gas: 283392)
+FixGeoAuditRegistryTest:test_RevertWhen_UnauthorizedRecordsAudit() (gas: 37966)
+FixGeoAuditRegistryTest:test_SubscriptionExpiration() (gas: 255680)
